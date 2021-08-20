@@ -23,22 +23,36 @@ namespace KcptunUI
         {
             MessageBox.Show("Start", "Title", MessageBoxButtons.OK, MessageBoxIcon.Information);
             
-            Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.CreateNoWindow = true;
+            startInfo.RedirectStandardOutput = true;
+            startInfo.UseShellExecute = false;
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.FileName = "C:\\bin\\kcptun.exe";
-            startInfo.Arguments = "-v";
-            process.StartInfo = startInfo;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.UseShellExecute = false;
-            process.Start();
+            startInfo.CreateNoWindow = true;
 
-            string q = "";
-            while (!process.HasExited)
+            startInfo.FileName = "C:\\bin\\kcptun.exe";
+            startInfo.Arguments = "-c C:\\Users\\alcheung\\programs\\kcptun\\bwg.json";
+
+            // process.StartInfo = startInfo;
+            Process process = Process.Start(startInfo);
+
+            var _ = ConsumeReader(process.StandardOutput);
+            _ = ConsumeReader(process.StandardError);
+
+            Console.WriteLine("Calling WaitForExit()...");
+            process.WaitForExit();
+            Console.WriteLine("Process has exited. Exit code: {0}", p.ExitCode);
+            Console.WriteLine("WaitForExit returned.");
+        }
+
+        async static Task ConsumeReader(TextReader reader)
+        {
+            string text;
+
+            while ((text = await reader.ReadLineAsync()) != null)
             {
-                q += process.StandardOutput.ReadToEnd();
+                Console.WriteLine(text);
             }
-            Console.WriteLine(q);
         }
 
         private void onStop(object sender, EventArgs e)
